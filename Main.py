@@ -95,7 +95,69 @@ def handle_bullets(yellow_bullets, red_bullets, red, yellow):
     for bullet in yellow_bullets:
         bullet.x += BULLET_VEL
         if red.colliderect(bullet):
-            pygame.event.post(pygame.event.EVENT(RED_HIT))
+            pygame.event.post(pygame.event.Event(RED_HIT))
             yellow_bullets.remove(bullet)
         elif bullet.x > WIDTH:
             yellow_bullets.remove(bullet) 
+    for bullet in red_bullets:
+        bullet.x -= BULLET_VEL
+        if yellow.colliderect(bullet):
+            pygame.event.post(pygame.event.Eventz(YELLOW_HIT))
+            red_bullets.remove(bullet)
+        elif bullet.x < 0:
+            red_bullets.remove(bullet) 
+
+def draw_winner(text):
+    draw_text = WINNER_FONT.render(text, 1, WHITE)
+    WIN.blit(draw_text, (WIDTH/2 - draw_text.get_width()/2, HEIGHT/2 - draw_text.get_height()/2))
+    pygame.display.update()
+    pygame.time.delay(5000)
+
+def main():
+    red = pygame.Rect(700,300, SPACESHIP_WIDTH, SPACESHIP_HEIGHT)
+    red_bullets = []
+    red_health = 10
+
+    yellow = pygame.Rect(100, 300, SPACESHIP_WIDTH, SPACESHIP_HEIGHT)
+
+    yellow_bullets =[]
+    yellow_health = 10
+
+    clock = pygame.time.Clock()
+    run = True
+
+    while run:
+        clock.tick(FPS)
+        for event in pygame.event.get():
+
+            if event.type == pygame.QUIT:
+                run = False
+                pygame.quit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_z and len(yellow_bullets) < MAX_BULLETS:
+                    bullet = pygame.Rect(yellow.x, yellow.y, 10, 5)
+                    yellow_bullets.append(bullet)
+                if event.key == pygame.K_m and len(red_bullets) < MAX_BULLETS:
+                    bullet = pygame.Rect(red.x, red.y, 10, 5)
+                    red_bullets.append(bullet)
+            if event.type == RED_HIT:
+                red_health -= 1
+            if event.type == YELLOW_HIT:
+                yellow_health -= 1
+        winner_text = ""
+        if red_health < 0:
+            winner_text = "Yellow Wins!"
+        if yellow_health <0:
+            winner_text = "Red wins!"
+        if winner_text != "":
+            draw_winner(winner_text)
+            break 
+        keys_pressed = pygame.key.get_pressed()
+        yellow_handle_movement(keys_pressed,  yellow)
+        red_handle_movement(keys_pressed, red)
+        handle_bullets(yellow_bullets, red_bullets, red, yellow)
+        drawWindow(red, yellow, red_bullets, yellow_bullets, red_health, yellow_health )
+    main()
+
+if __name__ == "__main__":
+    main()
